@@ -253,11 +253,6 @@ This action is irreversible, unless you create and attach a new filesystem modul
 
 Note: I can't promise there are no ways to break from this cage, so please use carefully and **at your own risk**.
 
-
-# Exceptions
-
-Just a tip about exceptions: if you want to capture exceptions that occur from C# side as JavaScript exceptions inside your script, you need to set `EnableRuntimeInterruptPropagation` to true. 
-
 # License
 
 V8.Extended is distributed under the permissive MIT license.
