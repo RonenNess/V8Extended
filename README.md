@@ -38,7 +38,7 @@ To see more code examples check out `V8.Extended.Demo`, or look at the tests cod
 Implements the basic logging methods of the `console` object, including `trace`, `debug`, `info`, `log`, `warn`, `error` and `assert`. 
 By default, will output logs to `System.Console` with different colors per log level.
 
-### Adding Module
+### Add To Engine
 
 To add the `console` module:
 
@@ -89,11 +89,10 @@ _console.AddHandler((string msg, V8Extended.ConsoleLevel level) =>
 
 ## Intervals
 
-Implements `setTimeout`, `setInterval`, `clearTimeout` and `clearInterval` all standard browsers have.
+Implements `setTimeout`, `setInterval`, `clearTimeout` and `clearInterval`, as standard browsers have.
 
-This module is a bit tricky, as it introduce threads into a JavaScript engine that is meant to be single threaded. However, if you're careful enough, it works great!
 
-### Adding Module
+### Add To Engine
 
 To add the `intervals` module:
 
@@ -103,21 +102,21 @@ V8Extended.Intervals _intervals = new();
 _intervals.Extend(v8);
 ```
 
-In addition to attaching the JavaScript APIs to the V8 engine, you also need to check the fake events loop used for the timers from C# side. You can do it automatically in a background thread:
+In addition to attaching the JavaScript module to the V8 engine, you also need to update the timers from C# side. You can do it automatically in a background thread:
 
 ```cs
 // start timers in background. call _intervals.StopEventsLoop(); to stop
 _intervals.StartEventsLoopBackground();
 ```
 
-Do it in the same thread:
+Or in the same thread:
 
 ```cs
 // start timers in current thread. call _intervals.StopEventsLoop(); to stop
 _intervals.StartEventsLoop();
 ```
 
-Or call it manually however you like (call this often enough, recommended every 1 ms, so that timers will not suffer from delays):
+Or call it manually however you like (recommended to call this every 1 ms, so that timers will not suffer from delays):
 
 ```cs
 _intervals.DoEvents();
@@ -144,11 +143,9 @@ Clear all timeouts and intervals.
 Optional errors handler you can attach to handle exceptions from inside the timers execution.
 
 
-*V8.Extended* comes with a set of modules you can attach to a running V8 engine to extend its functionality. Each module can be added separately, so you can control which modules to add.
-
 #### WriteExceptionsToConsole
 
-If true (default) and exception occurs from inside a timeout / interval callback, will use the `console` object to write error to console before proceeding.
+If true (default) and exception occurs from inside a timeout / interval callback, it will automatically use the `console` object to write error to console before propagating the error.
 
 If `console` is not set, will skip it.
 
@@ -156,7 +153,7 @@ If `console` is not set, will skip it.
 
 Implements the nodejs `path` module. 
 
-The following methods / fields are implemented:
+The following methods / members are implemented:
 
 - sep
 - delimiter
@@ -173,7 +170,7 @@ The following methods / fields are implemented:
 To learn more about these methods, please see nodejs docs on `Path` module.
 
 
-### Adding Module
+### Add To Engine
 
 To add the `path` module:
 
@@ -193,7 +190,7 @@ v8.Execute("var filePath = path.join('hello', 'world!');");
 
 Implements the nodejs `fs` module. 
 
-The following methods / fields are implemented:
+The following methods / members are implemented:
 
 - readFile()
 - writeFile()
@@ -210,20 +207,20 @@ The following methods / fields are implemented:
 
 Plust the following non-standard methods:
 
-- getType()
+- getType() -> returns 'file', 'dir' or 'none'.
 - isdir()
 - isfile()
 
-Note that every `fs` method have three versions:
+Note that every `fs` method have three versions to it:
 
-- The regular method (eg `fs.readFile`), that accept a callback with (err, returnVal) to invoke when operation is done / fails.
-- The `Sync` version (eg `fs.readFileSync`), that blocks until complete and return the value regularly (will throw exception on issues).
-- The `Promise` version (located under `fsPromises`, eg `fsPromises.readFile`), that return a promise abd work in background.
+- The regular method (eg `fs.readFile`), which accepts a callback with (err, returnVal) to be called when operation is complete.
+- The `Sync` version (eg `fs.readFileSync`), which blocks until completion and return the value directly (will throw exception on errors).
+- The `Promise` version (located under `fsPromises`, eg `fsPromises.readFile`), which returns a promise.
 
 To learn more about these methods, please see nodejs docs on the `fs` module.
 
 
-### Adding Module
+### Add To Engine
 
 To add the `fs` module:
 
@@ -245,13 +242,13 @@ v8.Execute($"fs.writeFileSync('test.txt', 'hello world!');");
 
 Set the root folder all filesystem-related operation will be relative to.
 
-#### LockPathToRoot()
+#### LockPathRoot()
 
-If called, will permanently lock all operation to be inside the `RootFolder` folder (preventing user from escaping that folder) and will prevent the ability to change the root folder.
+If called, will permanently lock all operation to be inside the `RootFolder` folder (ie preventing the script from leaving that folder) and will also block the ability to change the root folder. For example, if the JavaScript part tries to write file at "../filename.txt" an exception will be thrown.
 
 This action is irreversible, unless you create and attach a new filesystem module to the v8 engine.
 
-Note: I can't promise there are no ways to break from this cage, so please use carefully and **at your own risk**.
+Note: I tested most basic cases but there's a chance I've missed something, so please use carefully and **at your own risk**.
 
 # License
 
