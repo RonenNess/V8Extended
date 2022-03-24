@@ -29,6 +29,11 @@ setTimeout(function() {
 
 To see more code examples check out `V8.Extended.Demo`, or look at the tests code at `V8.Extended.Tests`.
 
+## NuGet
+
+Package NuGet can be found here: [https://www.nuget.org/packages/V8.Extended](https://www.nuget.org/packages/V8.Extended).
+
+
 # Usage
 
 *V8.Extended* comes with a set of modules you can attach to a running V8 engine to extend its functionality. Each module can be added separately, so you can control which modules to add.
