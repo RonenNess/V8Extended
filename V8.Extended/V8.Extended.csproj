@@ -9,6 +9,7 @@
     <RepositoryUrl>https://github.com/RonenNess/V8Extended</RepositoryUrl>
     <PackageProjectUrl>https://github.com/RonenNess/V8Extended</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
