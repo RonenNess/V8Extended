@@ -35,11 +35,11 @@ namespace Tests.V8.Extended
             // we do it 3 times because values are cached internally - repeating test caching
             for (var i = 0; i < 3; ++i)
             {
-                _utils.TestValueStr = null;
+                _utils.TestValue = null;
                 _v8.Execute("_testUtils_.TestValue = path.sep;");
                 Assert.AreEqual(System.IO.Path.DirectorySeparatorChar.ToString(), _utils.TestValue);
 
-                _utils.TestValueStr = null;
+                _utils.TestValue = null;
                 _v8.Execute("_testUtils_.TestValue = path.delimiter;");
                 Assert.AreEqual(_path.Delimiter.ToString(), _utils.TestValue);
             }
