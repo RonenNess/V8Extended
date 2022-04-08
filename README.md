@@ -303,6 +303,7 @@ Additional method in `TextDecoder` that accept additional params, `start` and `e
 ## 1.0.2 [WIP]
 
 - Fixed filesystem async methods to not throw exception when no callback is provided.
+- Fixed filesystem async and promises to be actually async.
 - Extended the demo project.
 - Updated ClearCode and V8 versions to latest (don't affect package, just for compatibility testing).
 
