@@ -72,6 +72,13 @@ namespace Tests.V8.Extended
             _v8.Execute($"fs.writeFileSync('test.txt', 'hello world!');");
             Assert.AreEqual("hello world!", System.IO.File.ReadAllText(System.IO.Path.Combine(_fs.RootFolder, "test.txt")));
             System.IO.File.Delete(System.IO.Path.Combine(_fs.RootFolder, "test.txt"));
+
+            _utils.TestValueStr = "This should be override by the callback on success!";
+            _v8.Execute($"fs.writeFile('test.txt', 'hello world!', (err, data) => {{ _testUtils_.TestValueStr = (err || ''); }});");
+            Thread.Sleep(50);
+            Assert.AreEqual("", _utils.TestValueStr);
+            Assert.AreEqual("hello world!", System.IO.File.ReadAllText(System.IO.Path.Combine(_fs.RootFolder, "test.txt")));
+            System.IO.File.Delete(System.IO.Path.Combine(_fs.RootFolder, "test.txt"));
         }
 
         /// <summary>

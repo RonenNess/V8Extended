@@ -300,7 +300,7 @@ Additional method in `TextDecoder` that accept additional params, `start` and `e
 
 - Added `TextEncoder` and `TextDecoder` classes.
 
-## 1.0.2 [WIP]
+## 1.0.2
 
 - Fixed filesystem async methods to not throw exception when no callback is provided.
 - Fixed filesystem async and promises to be actually async.
