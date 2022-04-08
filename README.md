@@ -210,7 +210,7 @@ The following methods / members are implemented:
 - rmdir()
 - stat()
 
-Plust the following non-standard methods:
+Plus the following non-standard methods:
 
 - getType() -> returns 'file', 'dir' or 'none'.
 - isdir()
@@ -254,6 +254,43 @@ If called, will permanently lock all operation to be inside the `RootFolder` fol
 This action is irreversible, unless you create and attach a new filesystem module to the v8 engine.
 
 Note: I tested most basic cases but there's a chance I've missed something, so please use carefully and **at your own risk**.
+
+
+## TextEncoder / TextDecoder
+
+Implements the `TextEncoder` and `TextDecoder` classes, which are currently missing from V8. 
+
+The following methods / members are implemented:
+
+- encode()
+- decode()
+- encoding
+
+**Note: does not support the `TextDecodeOptions` optional argument.**
+
+### Add To Engine
+
+To add the encoding classes:
+
+```cs
+// v8 is a V8ScriptEngine instance.
+V8Extended.TextEncoder _enc = new();
+_enc.Extend(v8);
+```
+
+This will add both `TextEncoder` and `TextDecoder` classes.
+
+### Usage Example
+
+```cs
+v8.Execute($"let textBytes = (new TextEncoder()).encode('hello world!');");
+```
+
+### Additional Options
+
+#### decodePart()
+
+Additional method in `TextDecoder` that accept additional params, `start` and `end`, to decode just a part of the buffer.
 
 # License
 

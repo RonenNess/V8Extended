@@ -65,5 +65,33 @@ namespace Tests.V8.Extended
             _v8.Execute("_testUtils_.TestValue = (new TextEncoder()).encode('hello עולם €');");
             CollectionAssert.AreEqual(new byte[] { 104, 101, 108, 108, 111, 32, 215, 162, 215, 149, 215, 156, 215, 157, 32, 226, 130, 172 }, (_utils.TestValue as ITypedArray<byte>).ArrayBuffer.GetBytes());
         }
+
+
+        /// <summary>
+        /// Test decoding.
+        /// </summary>
+        [TestMethod]
+        public void Decoding()
+        {
+            // make sure we return the correct type
+            _utils.TestValue = null;
+            _v8.Execute("_testUtils_.TestValue = (new TextDecoder()).decode([99]).constructor.name;");
+            Assert.AreEqual("String", _utils.TestValue);
+
+            // test simple ascii decoding
+            _utils.TestValue = null;
+            _v8.Execute("_testUtils_.TestValue = (new TextDecoder()).decode([104, 101, 108, 108, 111]);");
+            Assert.AreEqual("hello", _utils.TestValue);
+
+            // test non ascii decoding
+            _utils.TestValue = null;
+            _v8.Execute("_testUtils_.TestValue = (new TextDecoder()).decode([104, 101, 108, 108, 111, 32, 215, 162, 215, 149, 215, 156, 215, 157, 32, 226, 130, 172]);");
+            Assert.AreEqual("hello עולם €", _utils.TestValue);
+
+            // test non ascii decoding with bytes array
+            _utils.TestValue = null;
+            _v8.Execute("_testUtils_.TestValue = (new TextDecoder()).decode(new Uint8Array([104, 101, 108, 108, 111, 32, 215, 162, 215, 149, 215, 156, 215, 157, 32, 226, 130, 172]));");
+            Assert.AreEqual("hello עולם €", _utils.TestValue);
+        }
     }
 }
