@@ -293,6 +293,12 @@ v8.Execute($"let textBytes = (new TextEncoder()).encode('hello world!');");
 
 Additional method in `TextDecoder` that accept additional params, `start` and `end`, to decode just a part of the buffer.
 
+# Changes
+
+## 1.0.1
+
+- Added `TextEncoder` and `TextDecoder` classes.
+
 # License
 
 V8.Extended is distributed under the permissive MIT license.
