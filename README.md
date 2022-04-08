@@ -7,7 +7,8 @@
   - [Intervals](#intervals)
   - [Path](#path)
   - [Filesystem](#filesystem)
-  - [TextEncoder / TextDecoder](#textencoder-/-textdecoder)
+  - [TextEncoder / TextDecoder](#textencoder--textdecoder)
+- [Changes](#changes)
 - [License](#license)
 
 ## About
