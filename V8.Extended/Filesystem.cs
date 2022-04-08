@@ -45,94 +45,215 @@ namespace V8Extended
             Engine.Execute(@"
 var fs = 
 {
-    // read all data as text
-    readFile: function(path)
+    // read all data as text, sync
+    readFileSync: function(path)
     {
-        return __Filesystem__.ReadAllText(path);
+        let ret = __Filesystem__.ReadAllText(path);
+        __hostExceptionsHandler__.checkAndThrow();
+        return ret;
+    },
+
+    // read all data as text
+    readFile: function(path, cb)
+    {
+        __Filesystem__.ReadAllTextCb(path, cb);
+    },
+
+    // write all data as text, sync
+    writeFileSync: function(path, data)
+    {
+        __Filesystem__.WriteAllText(path, data);
+        __hostExceptionsHandler__.checkAndThrow();
     },
 
     // write all data as text
-    writeFile: function(path, data)
+    writeFile: function(path, data, cb)
     {
-        __Filesystem__.WriteAllText(path, data);
+        __Filesystem__.WriteAllTextCb(path, data, cb);
+    },
+
+    // append all data as text, sync
+    appendFileSync: function(path, data)
+    {
+        __Filesystem__.AppendAllText(path, data);
+        __hostExceptionsHandler__.checkAndThrow();
     },
 
     // append all data as text
-    appendFile: function(path, data)
+    appendFile: function(path, data, cb)
     {
-        __Filesystem__.AppendAllText(path, data);
+        __Filesystem__.AppendAllTextCb(path, data, cb);
     },
 
-    // get filenames in dir
-    readdir: function(path)
+    // get file names in dir, sync
+    readdirSync: function(path)
     {
-        return __Filesystem__.GetFiles(path);
+        let ret = __Filesystem__.GetFiles(path);
+        __hostExceptionsHandler__.checkAndThrow();
+        return ret;
+    },
+
+    // get file names in dir
+    readdir: function(path, cb)
+    {
+        __Filesystem__.GetFilesCb(path, cb);
+    },
+
+    // check if a file exists, sync
+    existsSync: function(path)
+    {
+        let ret = __Filesystem__.Exists(path);
+        __hostExceptionsHandler__.checkAndThrow();
+        return ret;
     },
 
     // check if a file exists
-    exists: function(path)
+    exists: function(path, cb)
     {
-        return __Filesystem__.Exists(path);
+        __Filesystem__.ExistsCb(path, cb);
+    },
+
+    // delete a file, sync
+    unlinkSync: function(path)
+    {
+        __Filesystem__.Delete(path);
+        __hostExceptionsHandler__.checkAndThrow();
     },
 
     // delete a file
-    unlink: function(path)
+    unlink: function(path, cb)
     {
-        __Filesystem__.Delete(path);
+        __Filesystem__.DeleteCb(path, cb);
+    },
+
+    // rename a file or folder, sync
+    renameSync: function(path, toPath)
+    {
+        __Filesystem__.Move(path, toPath);
+        __hostExceptionsHandler__.checkAndThrow();
     },
 
     // rename a file or folder
-    rename: function(path, toPath)
+    rename: function(path, toPath, cb)
     {
-        __Filesystem__.Move(path, toPath);
+        __Filesystem__.Move(path, toPath, cb);
+    },
+
+    // rename a file, sync
+    renameFileSync: function(path, toPath)
+    {
+        __Filesystem__.MoveFile(path, toPath);
+        __hostExceptionsHandler__.checkAndThrow();
     },
 
     // rename a file
-    renameFile: function(path, toPath)
+    renameFile: function(path, toPath, cb)
     {
-        __Filesystem__.MoveFile(path, toPath);
+        __Filesystem__.MoveFileCb(path, toPath, cb);
+    },
+
+    // rename a directory, sync
+    renameDirSync: function(path, toPath)
+    {
+        __Filesystem__.MoveDirectory(path, toPath);
+        __hostExceptionsHandler__.checkAndThrow();
     },
 
     // rename a directory
-    renameDir: function(path, toPath)
+    renameDir: function(path, toPath, cb)
     {
-        __Filesystem__.MoveDirectory(path, toPath);
+        __Filesystem__.MoveDirectoryCb(path, toPath, cb);
+    },
+
+    // create a folder, sync
+    mkdirSync: function(path)
+    {
+        __Filesystem__.CreateDirectory(path);
+        __hostExceptionsHandler__.checkAndThrow();
     },
 
     // create a folder
-    mkdir: function(path)
+    mkdir: function(path, cb)
     {
-        __Filesystem__.CreateDirectory(path);
+        __Filesystem__.CreateDirectoryCb(path, cb);
+    },
+
+    // delete a folder, sync
+    rmdirSync: function(path, options) 
+    {
+        __Filesystem__.DeleteDirectory(path, Boolean(options && options.recursive));
+        __hostExceptionsHandler__.checkAndThrow();
     },
 
     // delete a folder
-    rmdir: function(path, options) 
+    rmdir: function(path, options, cb) 
     {
-        __Filesystem__.DeleteDirectory(path, Boolean(options && options.recursive));
+        if (options) {
+            __Filesystem__.DeleteDirectoryCb(path, Boolean(options.recursive), cb);
+        }
+        else {
+            __Filesystem__.DeleteDirectoryCb(path, false, options);
+        }
+    },
+
+    // get file or folder type, returning one of: 'file', 'dir', 'none', sync.
+    getTypeSync: function(path)
+    {
+        let ret = __Filesystem__.GetType(path);
+        __hostExceptionsHandler__.checkAndThrow();
+        return ret;
     },
 
     // get file or folder type, returning one of: 'file', 'dir', 'none'.
-    getType: function(path)
+    getType: function(path, cb)
     {
-        return __Filesystem__.GetType(path);
+        __Filesystem__.GetTypeCb(path, cb);
+    },
+
+    // check if path is a folder, sync
+    isdirSync: function(path)
+    {
+        let ret = this.getTypeSync(path) === 'dir';
+        __hostExceptionsHandler__.checkAndThrow();
+        return ret;
     },
 
     // check if path is a folder
-    isdir: function(path)
+    isdir: function(path, cb)
     {
-        return this.getTypeSync(path) === 'dir';
+        this.getType(path, (err, res) => {
+            cb(err, res === 'dir');
+        });
+    },
+
+    // check if path is a file, sync
+    isfileSync: function(path)
+    {
+        let ret = this.getTypeSync(path) === 'file';
+        __hostExceptionsHandler__.checkAndThrow();
+        return ret;
     },
 
     // check if path is a file
     isfile: function(path)
     {
-        return this.getTypeSync(path) === 'file';
+        this.getType(path, (err, res) => {
+            cb(err, res === 'file');
+        });
+    },
+
+    // get file stat, sync
+    statSync: function(path)
+    {
+        let ret = __Filesystem__.Stat(path);
+        __hostExceptionsHandler__.checkAndThrow();
+        return ret;
     },
 
     // get file stat
-    stat: function(path)
+    stat: function(path, cb)
     {
-        return __Filesystem__.Stat(path);
+        __Filesystem__.StatCb(path, cb);
     },
 }
 
@@ -140,45 +261,25 @@ var fs =
 var fsPromises = {};
 ");
 
-            // build the 'promises' and 'Sync' version of all the methods
-            void BuildPromiseAndSyncMethods(string method)
+            // build the 'promises' version of a method
+            void BuildPromiseMethod(string method)
             {
+                // get method name and signature
                 var parts = method.Split(':');
                 var methodName = parts[0];
                 var methodSig = parts[1].Replace("function", "");
 
-                // build the Sync version and turn the original into async
-                Engine.Execute(@$"
-                    // rename original method to have 'Sync' sufix
-                    fs.{methodName}Sync = function{methodSig} {{
-                        let ret = fs.___{methodName}{methodSig};
-                        __hostExceptionsHandler__.checkAndThrow();
-                        return ret;
-                    }}
-                    fs.___{methodName} = fs.{methodName};
-
-                    // convert the original method to *fake* async
-                    fs.{methodName} = function{methodSig.Replace(")", ", callback)")}
-                    {{
-                        try {{
-                            let ret = fs.{methodName}Sync{methodSig};
-                            if (callback) {{ callback(null, ret); }}
-                        }}
-                        catch (e) {{
-                            if (callback) {{ callback(e, null); }}
-                        }}
-                    }}
-                ");
-
-                // build the promise method
+                // build the promise method on top of the async version of the methods
                 Engine.Execute(@$"
                     fsPromises.{methodName} = function{methodSig}
                     {{
                         return new Promise((resolve, reject) => {{
 
                             try {{
-                                let ret = fs.{methodName}Sync{methodSig};
-                                resolve(ret);
+                                fs.{methodName}{methodSig.TrimEnd(')')}, (err, ret) => {{
+                                    if (err) {{ reject(err); }}
+                                    else {{ resolve(ret); }}
+                                }});
                             }}
                             catch (e) {{
                                 reject(e);
@@ -189,21 +290,21 @@ var fsPromises = {};
             }
 
             // add promises
-            BuildPromiseAndSyncMethods("readFile: (path)");
-            BuildPromiseAndSyncMethods("writeFile: (path, data)");
-            BuildPromiseAndSyncMethods("appendFile: (path, data)");
-            BuildPromiseAndSyncMethods("getType: (path)");
-            BuildPromiseAndSyncMethods("rmdir: (path, options)");
-            BuildPromiseAndSyncMethods("mkdir: (path)");
-            BuildPromiseAndSyncMethods("renameDir: (path, toPath)");
-            BuildPromiseAndSyncMethods("renameFile: (path, toPath)");
-            BuildPromiseAndSyncMethods("rename: (path, toPath)");
-            BuildPromiseAndSyncMethods("unlink: (path)");
-            BuildPromiseAndSyncMethods("exists: (path)");
-            BuildPromiseAndSyncMethods("readdir: (path)");
-            BuildPromiseAndSyncMethods("isdir: (path)");
-            BuildPromiseAndSyncMethods("isfile: (path)");
-            BuildPromiseAndSyncMethods("stat: (path)");
+            BuildPromiseMethod("readFile: (path)");
+            BuildPromiseMethod("writeFile: (path, data)");
+            BuildPromiseMethod("appendFile: (path, data)");
+            BuildPromiseMethod("getType: (path)");
+            BuildPromiseMethod("rmdir: (path, options)");
+            BuildPromiseMethod("mkdir: (path)");
+            BuildPromiseMethod("renameDir: (path, toPath)");
+            BuildPromiseMethod("renameFile: (path, toPath)");
+            BuildPromiseMethod("rename: (path, toPath)");
+            BuildPromiseMethod("unlink: (path)");
+            BuildPromiseMethod("exists: (path)");
+            BuildPromiseMethod("readdir: (path)");
+            BuildPromiseMethod("isdir: (path)");
+            BuildPromiseMethod("isfile: (path)");
+            BuildPromiseMethod("stat: (path)");
 
             // success!
             return true;
@@ -526,6 +627,254 @@ var fsPromises = {};
                 PassExceptionToJs(ex);
             }
         }
+
+        /// <summary>
+        /// Read all text from a file.
+        /// </summary>
+        /// <param name="path">File path.</param>
+        /// <returns>Text read from file.</returns>
+        public async Task<string> ReadAllTextCb(string path, dynamic cb)
+        {
+            try
+            {
+                path = NormalizePath(path);
+                var ret = await File.ReadAllTextAsync(path);
+                cb(null, ret);
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+                return String.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Get all filenames in a path.
+        /// </summary>
+        /// <param name="path">Folder path.</param>
+        /// <returns>List with filenames under path.</returns>
+        public async Task<string[]> GetFilesCb(string path, dynamic cb)
+        {
+            try
+            {
+                path = NormalizePath(path);
+                var ret = await Task.Run(() => Directory.GetFileSystemEntries(path).Select(x => System.IO.Path.GetFileName(x)).ToArray());
+                cb(null, ret);
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+                return new string[] { };
+            }
+        }
+
+        /// <summary>
+        /// Check if a file or folder exists.
+        /// </summary>
+        /// <param name="path">Path to check.</param>
+        /// <returns>True if exists, false otherwise.</returns>
+        public async Task<bool> ExistsCb(string path, dynamic cb)
+        {
+            try
+            {
+                path = NormalizePath(path);
+                var ret = await Task.Run(() => File.Exists(path) || Directory.Exists(path));
+                cb(null, ret);
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Write all text into a file.
+        /// </summary>
+        /// <param name="path">File path.</param>
+        /// <param name="data">Data to write.</param>
+        public async Task WriteAllTextCb(string path, string data, dynamic cb)
+        {
+            try
+            {
+                path = NormalizePath(path);
+                await File.WriteAllTextAsync(path, data);
+                cb(null, null);
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+            }
+        }
+
+        /// <summary>
+        /// Append all text into a file.
+        /// </summary>
+        /// <param name="path">File path.</param>
+        /// <param name="data">Data to write.</param>
+        public async Task AppendAllTextCb(string path, string data, dynamic cb)
+        {
+            try
+            {
+                path = NormalizePath(path);
+                await File.AppendAllTextAsync(path, data);
+                cb(null, null);
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+            }
+        }
+
+        /// <summary>
+        /// Delete a file.
+        /// </summary>
+        /// <param name="path">File path to delete.</param>
+        public async Task DeleteCb(string path, dynamic cb)
+        {
+            try
+            {
+                await Task.Run(() => this.Delete(path));
+                cb(null, null);
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+            }
+        }
+
+        /// <summary>
+        /// Rename a file or folder.
+        /// </summary>
+        /// <param name="fromPath">Source path.</param>
+        /// <param name="toPath">Dest path.</param>
+        public async Task MoveCb(string fromPath, string toPath, dynamic cb)
+        {
+            try
+            {
+                await Task.Run(() => this.Move(fromPath, toPath));
+                cb(null, null);
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+            }
+        }
+
+        /// <summary>
+        /// Get type - either file, dir, or none.
+        /// </summary>
+        /// <param name="path">Path to check.</param>
+        /// <returns>Type of file / dir at path.</returns>
+        public async Task<string> GetTypeCb(string path, dynamic cb)
+        {
+            try
+            {
+                var ret = await Task.Run(() => this.GetType(path));
+                cb(null, ret);
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+                return "none";
+            }
+        }
+
+        /// <summary>
+        /// Rename a file.
+        /// </summary>
+        /// <param name="fromPath">Source path.</param>
+        /// <param name="toPath">Dest path.</param>
+        public async Task MoveFileCb(string fromPath, string toPath, dynamic cb)
+        {
+            try
+            {
+                await Task.Run(() => this.MoveFile(fromPath, toPath));
+                cb(null, null);
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+            }
+        }
+
+        /// <summary>
+        /// Get file/dir stat.
+        /// </summary>
+        /// <param name="path">File or directory path.</param>
+        /// <returns>File stat object.</returns>
+        public async Task<FileStat> StatCb(string path, dynamic cb)
+        {
+            try
+            {
+                var ret = await Task.Run(() => this.Stat(path));
+                cb(null, ret);
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Rename a folder.
+        /// </summary>
+        /// <param name="fromPath">Source path.</param>
+        /// <param name="toPath">Dest path.</param>
+        public async Task MoveDirectoryCb(string fromPath, string toPath, dynamic cb)
+        {
+            try
+            {
+                await Task.Run(() => this.MoveDirectory(fromPath, toPath));
+                cb(null, null);
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+            }
+        }
+
+        /// <summary>
+        /// Create a directory.
+        /// </summary>
+        /// <param name="path">Directory path.</param>
+        public async Task CreateDirectoryCb(string path, dynamic cb)
+        {
+            try
+            {
+                await Task.Run(() => this.CreateDirectory(path));
+                cb(null, null);
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+            }
+        }
+
+        /// <summary>
+        /// Delete a directory.
+        /// </summary>
+        /// <param name="path">Directory path.</param>
+        /// <param name="recursive">If true, will delete folder recursively.</param>
+        public async Task DeleteDirectoryCb(string path, bool recursive, dynamic cb)
+        {
+            try
+            {
+                await Task.Run(() => this.DeleteDirectory(path, recursive));
+                cb(null, null);
+            }
+            catch (Exception ex)
+            {
+                cb(ex.ToString(), null);
+            }
+        }
+
     }
 
     /// <summary>
