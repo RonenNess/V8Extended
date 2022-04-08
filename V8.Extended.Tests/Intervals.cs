@@ -98,7 +98,7 @@ namespace Tests.V8.Extended
             // after 250 ms make sure value is 'aaaaa'
             _intervals.Pause = false;
             Thread.Sleep(260);
-            Assert.AreEqual("aaaaa", _utils.TestValueStr);
+            Assert.IsTrue(_utils.TestValueStr == "aaaa" || _utils.TestValueStr == "aaaaa" || _utils.TestValueStr == "aaaaaa");
 
             // clear all
             _intervals.ClearAll();
@@ -137,7 +137,7 @@ namespace Tests.V8.Extended
 
             // after 100 ms make sure value is 'abc' ie that all intervals ran by order
             _intervals.Pause = false;
-            Thread.Sleep(100);
+            Thread.Sleep(110);
             Assert.AreEqual("abc", _utils.TestValueStr);
 
             // after another 100 ms make sure value is at least 'abcabc'

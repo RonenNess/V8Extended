@@ -56,7 +56,7 @@ var fs =
     // read all data as text
     readFile: function(path, cb)
     {
-        __Filesystem__.ReadAllTextCb(path, cb);
+        (() => { __Filesystem__.ReadAllTextCb(path, cb); })();
     },
 
     // write all data as text, sync
@@ -69,7 +69,7 @@ var fs =
     // write all data as text
     writeFile: function(path, data, cb)
     {
-        __Filesystem__.WriteAllTextCb(path, data, cb);
+        (() => { __Filesystem__.WriteAllTextCb(path, data, cb); })();
     },
 
     // append all data as text, sync
@@ -82,7 +82,7 @@ var fs =
     // append all data as text
     appendFile: function(path, data, cb)
     {
-        __Filesystem__.AppendAllTextCb(path, data, cb);
+        (() => { __Filesystem__.AppendAllTextCb(path, data, cb); })();
     },
 
     // get file names in dir, sync
@@ -96,7 +96,7 @@ var fs =
     // get file names in dir
     readdir: function(path, cb)
     {
-        __Filesystem__.GetFilesCb(path, cb);
+        (() => { __Filesystem__.GetFilesCb(path, cb); })();
     },
 
     // check if a file exists, sync
@@ -110,7 +110,7 @@ var fs =
     // check if a file exists
     exists: function(path, cb)
     {
-        __Filesystem__.ExistsCb(path, cb);
+        (() => { __Filesystem__.ExistsCb(path, cb); })();
     },
 
     // delete a file, sync
@@ -123,7 +123,7 @@ var fs =
     // delete a file
     unlink: function(path, cb)
     {
-        __Filesystem__.DeleteCb(path, cb);
+        (() => { __Filesystem__.DeleteCb(path, cb); })();
     },
 
     // rename a file or folder, sync
@@ -136,7 +136,7 @@ var fs =
     // rename a file or folder
     rename: function(path, toPath, cb)
     {
-        __Filesystem__.Move(path, toPath, cb);
+        (() => { __Filesystem__.Move(path, toPath, cb); })();
     },
 
     // rename a file, sync
@@ -149,7 +149,7 @@ var fs =
     // rename a file
     renameFile: function(path, toPath, cb)
     {
-        __Filesystem__.MoveFileCb(path, toPath, cb);
+        (() => { __Filesystem__.MoveFileCb(path, toPath, cb); })();
     },
 
     // rename a directory, sync
@@ -162,7 +162,7 @@ var fs =
     // rename a directory
     renameDir: function(path, toPath, cb)
     {
-        __Filesystem__.MoveDirectoryCb(path, toPath, cb);
+        (() => { __Filesystem__.MoveDirectoryCb(path, toPath, cb); })();
     },
 
     // create a folder, sync
@@ -175,7 +175,7 @@ var fs =
     // create a folder
     mkdir: function(path, cb)
     {
-        __Filesystem__.CreateDirectoryCb(path, cb);
+        (() => { __Filesystem__.CreateDirectoryCb(path, cb); })();
     },
 
     // delete a folder, sync
@@ -188,12 +188,14 @@ var fs =
     // delete a folder
     rmdir: function(path, options, cb) 
     {
-        if (options) {
-            __Filesystem__.DeleteDirectoryCb(path, Boolean(options.recursive), cb);
-        }
-        else {
-            __Filesystem__.DeleteDirectoryCb(path, false, options);
-        }
+        (() => { 
+            if (options) {
+                __Filesystem__.DeleteDirectoryCb(path, Boolean(options.recursive), cb);
+            }
+            else {
+                __Filesystem__.DeleteDirectoryCb(path, false, options);
+            }
+        })();
     },
 
     // get file or folder type, returning one of: 'file', 'dir', 'none', sync.
@@ -207,7 +209,7 @@ var fs =
     // get file or folder type, returning one of: 'file', 'dir', 'none'.
     getType: function(path, cb)
     {
-        __Filesystem__.GetTypeCb(path, cb);
+        (() => { __Filesystem__.GetTypeCb(path, cb); })();
     },
 
     // check if path is a folder, sync
@@ -221,9 +223,11 @@ var fs =
     // check if path is a folder
     isdir: function(path, cb)
     {
-        this.getType(path, (err, res) => {
-            cb(err, res === 'dir');
-        });
+        (() => { 
+            this.getType(path, (err, res) => {
+                cb(err, res === 'dir');
+            });
+        })();
     },
 
     // check if path is a file, sync
@@ -237,9 +241,11 @@ var fs =
     // check if path is a file
     isfile: function(path)
     {
-        this.getType(path, (err, res) => {
-            cb(err, res === 'file');
-        });
+        (() => { 
+            this.getType(path, (err, res) => {
+                cb(err, res === 'file');
+            });
+        })();
     },
 
     // get file stat, sync
@@ -253,7 +259,7 @@ var fs =
     // get file stat
     stat: function(path, cb)
     {
-        __Filesystem__.StatCb(path, cb);
+        (() => { __Filesystem__.StatCb(path, cb); })();
     },
 }
 

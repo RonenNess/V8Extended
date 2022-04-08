@@ -51,6 +51,14 @@ namespace Tests.V8.Extended
             Assert.AreEqual("hello world!", _utils.TestValueStr);
             System.IO.File.Delete(System.IO.Path.Combine(_fs.RootFolder, "test.txt"));
 
+            // read file async
+            _utils.TestValueStr = null;
+            System.IO.File.WriteAllText(System.IO.Path.Combine(_fs.RootFolder, "test.txt"), "hello world!");
+            _v8.Execute($"fs.readFile('test.txt', (err, data) => {{ _testUtils_.TestValueStr = data + (err || ''); }});");
+            Thread.Sleep(50);
+            Assert.AreEqual("hello world!", _utils.TestValueStr);
+            System.IO.File.Delete(System.IO.Path.Combine(_fs.RootFolder, "test.txt"));
+
             // file not found
             Assert.ThrowsException<ScriptEngineException>(() => { _v8.Execute($"let data2 = fs.readFileSync('not_exist.txt')"); });
         }
