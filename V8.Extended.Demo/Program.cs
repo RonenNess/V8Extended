@@ -68,6 +68,21 @@ try
                 case 'delete':
                     deleteFile(command.args);
                     break;
+                
+                case 'dir':
+                    dirCommand(command.args);
+                    break;
+
+                case 'rmdir':
+                    rmDir(command.args);
+                    break;
+
+                case 'mkdir':
+                    makeDir(command.args);
+                    break;
+
+                default:
+                    throw new Error('Unknown command!');
             }
 
             // finish command
@@ -127,6 +142,56 @@ try
                 console.error(e);
             }
         }
+
+        // implement method to get files and fodler names
+        function dirCommand(args)
+        {
+            var p = args[0];
+            try {
+                var files = fs.readdirSync(p);
+                for (let file of files) {
+                    let prefix = fs.isfileSync(file) ? '[F] ' : '[D] ';
+                    console.log(prefix + file);
+                }
+            }
+            catch (e) {
+                console.error(e);
+            }
+        }
+
+        // implement makedir method
+        function makeDir(args)
+        {
+            var p = args[0];
+            try {
+                fs.mkdirSync(p);
+                console.log('Folder created.');
+            }
+            catch (e) {
+                console.error(e);
+            }
+        }
+
+        // implement remove dir method
+        function rmDir(args)
+        {
+            var p = args[0];
+            try {
+                if (!fs.existsSync(p)) {
+                    console.error('Folder not found!');
+                    return;
+                }
+                if (!fs.isdirSync(p)) {
+                    console.error('Not a folder!');
+                    return;
+                }
+                fs.rmdirSync(p);
+                console.log('Folder deleted.');
+            }
+            catch (e) {
+                console.error(e);
+            }
+        }
     ");
 }
 catch (Exception ex)
@@ -153,6 +218,9 @@ void PrintHelp()
     - 'read': read a file.
     - 'write': write a file.
     - 'delete': delete a file.
+    - 'dir': show files and folder names.
+    - 'mkdir': create a folder.
+    - 'rmdir' remove a folder.
     - 'exit': exit application.
 ");
 }
@@ -180,6 +248,30 @@ void WriteFileCommand()
     Console.Write("Data to write: ");
     var data = Console.ReadLine();
     SendCommandToJs("write", new string[] { path, data });
+}
+
+// dir command
+void DirCommand()
+{
+    Console.Write("Dir path (empty for cwd): ");
+    var path = Console.ReadLine();
+    SendCommandToJs("dir", new string[] { path });
+}
+
+// make dir command
+void MakeDirCommand()
+{
+    Console.Write("Dir path: ");
+    var path = Console.ReadLine();
+    SendCommandToJs("mkdir", new string[] { path });
+}
+
+// remove dir command
+void RemoveDirCommand()
+{
+    Console.Write("Dir path: ");
+    var path = Console.ReadLine();
+    SendCommandToJs("rmdir", new string[] { path });
 }
 
 // delete file command
@@ -232,6 +324,18 @@ while (true)
 
         case "write":
             WriteFileCommand();
+            break;
+
+        case "dir":
+            DirCommand();
+            break;
+
+        case "mkdir":
+            MakeDirCommand();
+            break;
+
+        case "rmdir":
+            RemoveDirCommand();
             break;
 
         case "delete":

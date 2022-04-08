@@ -300,6 +300,12 @@ Additional method in `TextDecoder` that accept additional params, `start` and `e
 
 - Added `TextEncoder` and `TextDecoder` classes.
 
+## 1.0.2 [WIP]
+
+- Fixed filesystem async methods to not throw exception when no callback is provided.
+- Extended the demo project.
+- Updated ClearCode and V8 versions to latest (don't affect package, just for compatibility testing).
+
 # License
 
 V8.Extended is distributed under the permissive MIT license.

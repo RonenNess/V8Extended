@@ -162,10 +162,10 @@ var fsPromises = {};
                     {{
                         try {{
                             let ret = fs.{methodName}Sync{methodSig};
-                            callback(null, ret);
+                            if (callback) {{ callback(null, ret); }}
                         }}
                         catch (e) {{
-                            callback(e, null);
+                            if (callback) {{ callback(e, null); }}
                         }}
                     }}
                 ");
