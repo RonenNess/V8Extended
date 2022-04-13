@@ -102,6 +102,30 @@ namespace Tests.V8.Extended
 
             // clear all
             _intervals.ClearAll();
+
+            // set timeout from inside timeout, with short random interval
+            _intervals.Pause = true;
+            _utils.TestValue = 0;
+            _v8.Execute(@"
+    var __methodCounter = 0;
+    _method_ = () => {
+        __methodCounter++;
+        _testUtils_.TestValue++; 
+        if (__methodCounter < 60) {
+            _testUtils_.TestValueStr = __methodCounter.toString();
+            setTimeout(_method_, Math.random());
+        }; 
+    }
+    _method_();
+");
+
+            // after 80 ms make sure value is 60
+            _intervals.Pause = false;
+            Thread.Sleep(80);
+            Assert.AreEqual(60, _utils.TestValue);
+
+            // clear all
+            _intervals.ClearAll();
         }
 
         /// <summary>
@@ -138,7 +162,7 @@ namespace Tests.V8.Extended
             // after 100 ms make sure value is 'abc' ie that all intervals ran by order
             _intervals.Pause = false;
             Thread.Sleep(110);
-            Assert.AreEqual("abc", _utils.TestValueStr);
+            Assert.IsTrue(_utils.TestValueStr == "abc" || _utils.TestValueStr == "abca");
 
             // after another 100 ms make sure value is at least 'abcabc'
             Thread.Sleep(100);

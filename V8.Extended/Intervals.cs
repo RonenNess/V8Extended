@@ -7,9 +7,6 @@ namespace V8Extended
     /// </summary>
     public class Intervals : V8Extender
     {
-        // to reduce garbage creation from engine.Execute()
-        Microsoft.ClearScript.V8.V8Script _compiledScript;
-
         /// <summary>
         /// If true and 'console' exist, will catch and write exceptions to console.
         /// </summary>
@@ -38,23 +35,41 @@ var __IntervalsAndTimeouts__ = {
 
     _nextId: 1,
 
+    _needSort: false,
+
+    usedIds: new Set(),
+
     clear: function()
     {
         this.list = [];
+        this.usedIds = new Set();
+        this._needSort = false;
     },
 
     push: function(data)
     {
-        data.id = this._nextId++;
+        while (this.usedIds.has(this._nextId)) {
+            this._nextId++;
+            if (this._nextId >= Number.MAX_SAFE_INTEGER) { this._nextId = 1; }
+        }
+        this.usedIds.add(this._nextId);
+        data.id = this._nextId;
         this.list.push(data);
-        this.sort();
+        this._needSort = true;
         return data.id;
+    },
+
+    sortIfNeeded: function() {
+        if (this._needSort && this.list.length > 1) {
+            this.sort();
+        }
     },
 
     sort: function() {
         this.list.sort(function(a, b) {
           return a.expires - b.expires;
         });
+        this._needSort = false;
     },
 
     remove: function(id)
@@ -62,62 +77,43 @@ var __IntervalsAndTimeouts__ = {
         for (let i = 0; i < this.list.length; ++i) {
             if (this.list[i].id === id) {
                 this.list.splice(i, 1);
+                this.usedIds.delete(id);
                 return;
             }
         }
     },
-};");
+};
 
-            // add timeout callbacks
-            Engine.Execute(@"
-var setTimeout = function(cb, interval) {
-    if (typeof cb !== 'function') { cb = function() {}; }
-    let id = __IntervalsAndTimeouts__.push({callback: cb, expires: new Date().getTime() + interval, interval: interval, repeats: false});
-    return id;
-};
-var clearTimeout = function(id) {
-    __IntervalsAndTimeouts__.remove(id)
-};
-            ");
 
-            // add interval callbacks
-            Engine.Execute(@"
-var setInterval = function(cb, interval) {
-    if (typeof cb !== 'function') { cb = function() {}; }
-    let id = __IntervalsAndTimeouts__.push({callback: cb, expires: new Date().getTime() + interval, interval: interval, repeats: true});
-    return id;
-};
-var clearInterval = function(id) {
-    __IntervalsAndTimeouts__.remove(id)
-};
-            ");
+// method to run intervals.
+// this will be invoked from host side.
+__IntervalsAndTimeouts__.__doEvents = function() {
 
-            // compile code to execute timeout or interval
-            _compiledScript = Engine.Compile(@"
-{
+    // sort if needed
+    this.sortIfNeeded();
 
     // iterate timers and check what expired
-    let _needSort_ = false;
-    let _toRemove_ = [];
-    for (let curr of __IntervalsAndTimeouts__.list)
+    let _intervals = this.list.slice(0);
+    for (let curr of _intervals)
     {
-        // get timestamp and if we reached something that didn't expire, break
-        let currTs = new Date().getTime();
+        // get timestamp and if we reached something that didn't expire, break (keep in mind its sorted)
+        let currTs = (new Date()).getTime();
         if (currTs < curr.expires) { break; }
         
+        // execute current interval / timeout
         try
         {
             // update repeating invervals
             if (curr.repeats) {
                 curr.expires = curr.expires + curr.interval;
-                _needSort_ = true;
+                this._needSort = true;
             }
-            // remove if not repeating
+            // if its not a repeating interval, remove it
             else {
-                _toRemove_.push(curr);
+                this.remove(curr.id);
             }
 
-            // trigger callback
+            // trigger the callback
             curr.callback();
         }
         catch (e)
@@ -128,17 +124,33 @@ var clearInterval = function(id) {
             throw e;
         }
     }
+}
 
-    // remove stuff we need to remove
-    for (let rem of _toRemove_) {
-        __IntervalsAndTimeouts__.remove(rem.id);
-    }
 
-    // do sorting if needed
-    if (_needSort_) {
-        __IntervalsAndTimeouts__.sort();
-    }
-}");
+// method to create timeouts
+var setTimeout = function(cb, interval) {
+    if (typeof cb !== 'function') { cb = function() {}; }
+    interval = Math.round(interval);
+    let id = __IntervalsAndTimeouts__.push({callback: cb, expires: (new Date()).getTime() + interval, interval: interval, repeats: false});
+    return id;
+};
+var clearTimeout = function(id) {
+    __IntervalsAndTimeouts__.remove(id)
+};
+
+
+// method to create intervals
+var setInterval = function(cb, interval) {
+    if (typeof cb !== 'function') { cb = function() {}; }
+    interval = Math.round(interval);
+    let id = __IntervalsAndTimeouts__.push({callback: cb, expires: (new Date()).getTime() + interval, interval: interval, repeats: true});
+    return id;
+};
+var clearInterval = function(id) {
+    __IntervalsAndTimeouts__.remove(id)
+};
+
+");
 
             return true;
         }
@@ -156,7 +168,7 @@ var clearInterval = function(id) {
         /// </summary>
         public void ClearAll()
         {
-            Engine.Execute("__IntervalsAndTimeouts__.clear();");
+            Engine.Script.__IntervalsAndTimeouts__.clear();
         }
 
         /// <summary>
@@ -182,7 +194,7 @@ var clearInterval = function(id) {
             Running = true;
             while (Running)
             {
-                await Task.Delay(1);
+                //await Task.Delay(1);
                 DoEvents();
             }
         }
@@ -204,7 +216,7 @@ var clearInterval = function(id) {
         {
             try
             {
-                Engine.Execute(_compiledScript);
+                Engine.Script.__IntervalsAndTimeouts__.__doEvents();
             }
             catch (Exception ex)
             {

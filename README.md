@@ -307,6 +307,11 @@ Additional method in `TextDecoder` that accept additional params, `start` and `e
 - Extended the demo project.
 - Updated ClearCode and V8 versions to latest (don't affect package, just for compatibility testing).
 
+## 1.0.3
+
+- Fixed bug with timeouts execution.
+- Improved intervals and timeouts code.
+
 # License
 
 V8.Extended is distributed under the permissive MIT license.
