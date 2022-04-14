@@ -312,6 +312,10 @@ Additional method in `TextDecoder` that accept additional params, `start` and `e
 - Fixed bug with timeouts execution.
 - Improved intervals and timeouts code.
 
+## 1.0.4
+
+- Fixed running intervals / timers in background thread / loop to work properly + updated tests.
+
 # License
 
 V8.Extended is distributed under the permissive MIT license.

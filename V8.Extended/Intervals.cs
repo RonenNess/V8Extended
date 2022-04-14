@@ -98,7 +98,7 @@ __IntervalsAndTimeouts__.__doEvents = function() {
     {
         // get timestamp and if we reached something that didn't expire, break (keep in mind its sorted)
         let currTs = (new Date()).getTime();
-        if (currTs < curr.expires) { break; }
+        if (currTs+1 < curr.expires) { break; }
         
         // execute current interval / timeout
         try
@@ -174,15 +174,17 @@ var clearInterval = function(id) {
         /// <summary>
         /// Start events loop in background task.
         /// </summary>
+        /// <remarks>To avoid high CPU usage, this method use `SpinOnce` after every call. This means that timers will only be called every ~15ms.</remarks>
         public void StartEventsLoopBackground()
         {
             _backgroundThread = Task.Run(StartEventsLoop);
         }
 
         /// <summary>
-        /// Run the events loop in current thread.
+        /// Run the events loop in current thread in endless loop.
         /// </summary>
-        public async void StartEventsLoop()
+        /// <remarks>To avoid high CPU usage, this method use `SpinOnce` after every call. This means that timers will only be called every ~15ms.</remarks>
+        public void StartEventsLoop()
         {
             // stop previous run
             if (Running)
@@ -192,13 +194,17 @@ var clearInterval = function(id) {
 
             // loop over scheduled events
             Running = true;
+            SpinWait sw = new SpinWait();
             while (Running)
             {
-                //await Task.Delay(1);
                 DoEvents();
+                sw.SpinOnce();
             }
         }
 
+        /// <summary>
+        /// Stop running events loop, if StartEventsLoop() or StartEventsLoopBackground() was previously called.
+        /// </summary>
         public void StopEventsLoop()
         {
             Running = false;
@@ -210,8 +216,9 @@ var clearInterval = function(id) {
         }
 
         /// <summary>
-        /// Execute all expired events manually (you can call this instead of StartEventsLoop / StartEventsLoopBackground).
+        /// Execute all expired timeouts / intervals once.
         /// </summary>
+        /// <remarks>Instead of calling this manually, you can call StartEventsLoop() or StartEventsLoopBackground() to run in background automatically.</remarks>
         public void DoEvents()
         {
             try

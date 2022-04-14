@@ -119,9 +119,10 @@ namespace Tests.V8.Extended
     _method_();
 ");
 
-            // after 80 ms make sure value is 60
+            // after 16*60 ms make sure value is 60
+            // note: 16 because min resolution for timer delay is ~15ms
             _intervals.Pause = false;
-            Thread.Sleep(80);
+            Thread.Sleep(16*60);
             Assert.AreEqual(60, _utils.TestValue);
 
             // clear all
