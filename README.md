@@ -17,7 +17,7 @@
 
 All host objects imitate nodejs / browsers standard behavior as closely as possible, but not 100% of APIs are implemented. 
 
-In addition to the JavaScript-side API, *V8.Extended* provides a host-side (C#) API to fine-tune and control some of the APIs behavior. For example, you can look the `fs` module to a specific folder, or modify `console` colors.
+In addition to the JavaScript-side API, *V8.Extended* provides a host-side (C#) API to fine-tune and control some of the APIs behavior. For example, you can lock the `fs` module to a specific folder, or modify `console` colors.
 
 **With V8.Extended enabled, the following code would work**:
 
